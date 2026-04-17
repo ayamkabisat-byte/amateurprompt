@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indonesian Amateur Shot Generator V4.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        pre { background-color: #1e293b; scrollbar-width: thin; scrollbar-color: #ef4444 #1e293b; }
+        pre::-webkit-scrollbar { width: 8px; height: 8px; }
+        pre::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+        pre::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 4px; }
+        select:disabled, input:disabled { opacity: 0.4; cursor: not-allowed; border-color: #475569; }
+        optgroup { font-weight: bold; color: #fbbf24; background-color: #0f172a; }
+        option { color: #e2e8f0; }
+        .listbox-scroll::-webkit-scrollbar { width: 6px; }
+        .listbox-scroll::-webkit-scrollbar-track { background: #0f172a; border-radius: 8px; }
+        .listbox-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+        .listbox-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .radio-input:focus-visible + div { outline: 2px solid #ef4444; outline-offset: 2px; border-radius: 4px; }
+        .locked-border { border-color: #ef4444 !important; opacity: 0.6; pointer-events: none; }
+        .lock-icon.locked { color: #ef4444; }
+        .lock-icon.unlocked { color: #64748b; }
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- DATA FILES — order matters (dependencies first)              -->
+    <!-- ============================================================ -->
+    <script src="data/demographics.js"></script>
+    <script src="data/wardrobe.js"></script>
+    <script src="data/aesthetics.js"></script>
+    <script src="data/locations.js"></script>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+<div id="mainContent" class="w-full max-w-7xl">
+
+    <!-- HEADER -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">
+            <i class="fa-solid fa-camera-retro text-red-500 mr-2"></i> Indonesian Amateur Shot V4.0
+        </h1>
+        <p class="text-slate-400">Expanded Database · Bug-Fixed · Multi-File Architecture · Ratusan Skenario.</p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- GROUP 1: BASIC DEMOGRAPHICS                                  -->
+    <!-- ============================================================ -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg text-sm mb-4">
+
+        <div>
+            <label class="flex justify-between items-center text-slate-400 mb-1 font-semibold text-xs">
+                <span>Jumlah Orang</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white focus:outline-none"
+                   onclick="toggleLock('numSelect', this)" onkeydown="if(event.key==='Enter')toggleLock('numSelect',this)"></i>
+            </label>
+            <select id="numSelect" onchange="onNumOrGenderChange()" class="w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2 outline-none focus:border-red-500 cursor-pointer">
+                <option value="RANDOM">🎲 Acak (1-6)</option>
+                <option value="1">1 Orang (Solo)</option>
+                <option value="2">2 Orang (Duo)</option>
+                <option value="3">3 Orang (Grup Kecil)</option>
+                <option value="4">4 Orang (Grup)</option>
+                <option value="5">5 Orang (Grup Besar)</option>
+                <option value="6">6 Orang (Grup Besar)</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="flex justify-between items-center text-slate-400 mb-1 font-semibold text-xs">
+                <span>Rentang Usia</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('ageSelect', this)"></i>
+            </label>
+            <select id="ageSelect" onchange="triggerGenerate()" class="w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2 outline-none focus:border-red-500 cursor-pointer">
+                <option value="RANDOM">🎲 Acak Usia</option>
+                <option value="TEENAGER">Remaja (13-19)</option>
+                <option value="YOUNG_ADULT">Dewasa Muda (20-29)</option>
+                <option value="ADULT">Dewasa (30-40)</option>
+                <option value="MATURE">Paruh Baya (40+)</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="flex justify-between items-center text-yellow-400 mb-1 font-semibold text-xs">
+                <span><i class="fa-solid fa-star"></i> Tipe Badan</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('bodyTypeSelect', this)"></i>
+            </label>
+            <select id="bodyTypeSelect" onchange="triggerGenerate()" class="w-full bg-slate-900 text-yellow-200 border border-yellow-600 rounded p-2 outline-none focus:border-yellow-400 cursor-pointer">
+                <option value="MATCH">🖼️ Sesuai Foto (Default)</option>
+                <option value="RANDOM">🎲 Acak Badan</option>
+                <option value="SLIM AND PETITE">Lebih Slim / Kurus</option>
+                <option value="THICK AND CURVY">Curvy / Berisi</option>
+                <option value="MUSCULAR AND TONED">Berotot / Atletis</option>
+                <option value="CHUBBY">Chubby / Gemuk</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="flex justify-between items-center text-slate-400 mb-1 font-semibold text-xs">
+                <span>Gender</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('genderSelect', this)"></i>
+            </label>
+            <select id="genderSelect" onchange="onNumOrGenderChange()" class="w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2 outline-none focus:border-red-500 cursor-pointer">
+                <option value="RANDOM">🎲 Acak / Campur</option>
+                <option value="MALE">Semua Pria</option>
+                <option value="FEMALE">Semua Wanita</option>
+                <option value="COUPLE">Couple (Pria & Wanita)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- GROUP 2: BIG LIST BOXES                                      -->
+    <!-- ============================================================ -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg text-sm mb-4">
+
+        <!-- Era + Location -->
+        <div class="flex flex-col h-[400px]">
+            <label class="flex justify-between items-center text-blue-400 mb-1 font-semibold text-xs">
+                <span><i class="fa-solid fa-clock-rotate-left"></i> Era / Zaman</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('eraSelect', this)"></i>
+            </label>
+            <select id="eraSelect" onchange="renderLocationList(); triggerGenerate();"
+                class="w-full bg-slate-900 text-blue-200 border border-blue-600 rounded p-2 outline-none focus:border-blue-400 cursor-pointer font-bold mb-3 shrink-0">
+                <option value="RANDOM">🎲 Acak Era Otomatis</option>
+                <option value="MODERN_2020S">2020s (Modern / Gen-Z)</option>
+                <option value="TIMELESS_BASIC">Timeless / Basic Kasual</option>
+                <option value="HIPSTER_2010S">2010s (Hipster/Indie)</option>
+                <option value="Y2K_2000S">2000s (Y2K/Warnet)</option>
+                <option value="GRUNGE_1990S">1990s (Grunge/Retro)</option>
+            </select>
+
+            <label class="flex justify-between items-center text-slate-400 mb-1 font-semibold text-xs">
+                <span><i class="fa-solid fa-map-location-dot"></i> Lokasi Spesifik</span>
+                <i id="locLockIcon" role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLocLock()"></i>
+            </label>
+            <input type="hidden" id="locSelect" value="RANDOM">
+            <div id="locListContainer" class="flex-1 overflow-y-auto listbox-scroll bg-slate-900 border border-slate-600 rounded-lg p-2 flex flex-col gap-1.5"></div>
+        </div>
+
+        <!-- Camera -->
+        <div class="flex flex-col h-[400px]">
+            <label class="flex justify-between items-center text-orange-400 mb-1 font-semibold text-xs">
+                <span><i class="fa-solid fa-video"></i> Gaya Kamera & Angle</span>
+                <i id="camLockIcon" role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleCamLock()"></i>
+            </label>
+            <input type="hidden" id="cameraSelect" value="RANDOM">
+            <div id="cameraListContainer" class="flex-1 overflow-y-auto listbox-scroll bg-slate-900 border border-orange-600/50 rounded-lg p-2 flex flex-col gap-1.5"></div>
+        </div>
+
+        <!-- Aesthetic -->
+        <div class="flex flex-col h-[400px]">
+            <label class="flex justify-between items-center text-purple-400 mb-1 font-semibold text-xs">
+                <span><i class="fa-solid fa-wand-magic-sparkles"></i> Filter / Aesthetic</span>
+                <i id="aesLockIcon" role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleAesLock()"></i>
+            </label>
+            <input type="hidden" id="aestheticSelect" value="DEFAULT">
+            <div id="aesListContainer" class="flex-1 overflow-y-auto listbox-scroll bg-slate-900 border border-purple-600/50 rounded-lg p-2 flex flex-col gap-1.5"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- GROUP 3: TECHNICALS & SCENARIO                               -->
+    <!-- ============================================================ -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg text-sm items-end mb-4">
+
+        <div>
+            <label class="flex justify-between items-center text-cyan-400 mb-1 font-semibold text-xs">
+                <span><i class="fa-solid fa-crop-simple"></i> Komposisi Frame</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('compSelect', this)"></i>
+            </label>
+            <select id="compSelect" onchange="triggerGenerate()" class="w-full bg-slate-900 text-cyan-200 border border-cyan-700 rounded p-2 outline-none focus:border-cyan-400 cursor-pointer">
+                <option value="NONE">❌ Tidak Ada (Amateur Style)</option>
+                <option value="RANDOM">🎲 Acak (Otomatis)</option>
+                <option value="GOLDEN_RATIO">Golden Ratio</option>
+                <option value="RULE_OF_THIRDS">Rule of Thirds</option>
+                <option value="SYMMETRY">Symmetry & Balance</option>
+                <option value="GOLDEN_TRIANGLE">Golden Triangle</option>
+                <option value="DIAGONAL">Diagonal</option>
+                <option value="FILL_FRAME">Fill the Frame</option>
+                <option value="NEGATIVE_SPACE">Negative Space</option>
+                <option value="LEADING_LINES">Leading Lines</option>
+                <option value="FRAMING">Natural Framing</option>
+                <option value="CENTERED_BOLD">Centered Bold</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="flex justify-between items-center text-yellow-400 mb-1 font-semibold text-xs">
+                <span><i class="fa-solid fa-star"></i> Hari Raya / Perayaan</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('holidaySelect', this)"></i>
+            </label>
+            <select id="holidaySelect" onchange="triggerGenerate()" class="w-full bg-slate-900 text-yellow-200 border border-yellow-600 rounded p-2 outline-none focus:border-yellow-400 cursor-pointer">
+                <option value="NONE">❌ Tidak Ada (Biasa)</option>
+                <option value="RANDOM_HOLIDAY">🎲 Acak (Inkl. Libur)</option>
+                <option value="EID">Idul Fitri (Lebaran)</option>
+                <option value="CHRISTMAS">Natal (Christmas)</option>
+                <option value="IMLEK">Imlek (Lunar New Year)</option>
+                <option value="GALUNGAN">Galungan (Bali)</option>
+                <option value="HUT_RI">HUT RI (17 Agustus)</option>
+                <option value="NYEPI">Nyepi (Bali Day of Silence)</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="flex justify-between items-center text-slate-400 mb-1 font-semibold text-xs">
+                <span>Waktu (Time)</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('timeSelect', this)"></i>
+            </label>
+            <select id="timeSelect" onchange="triggerGenerate()" class="w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2 outline-none focus:border-red-500 cursor-pointer">
+                <option value="RANDOM">🎲 Acak Waktu</option>
+                <option value="MORNING">Pagi Hari</option>
+                <option value="AFTERNOON">Siang Bolong</option>
+                <option value="GOLDEN_HOUR">Sore (Golden Hour)</option>
+                <option value="NIGHT">Malam Hari (Night)</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="flex justify-between items-center text-slate-400 mb-1 font-semibold text-xs">
+                <span>Cuaca (Weather)</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('weatherSelect', this)"></i>
+            </label>
+            <select id="weatherSelect" onchange="triggerGenerate()" class="w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2 outline-none focus:border-red-500 cursor-pointer">
+                <option value="RANDOM">🎲 Acak Cuaca</option>
+                <option value="CLEAR">Cerah / Normal</option>
+                <option value="OVERCAST">Mendung (Gloomy)</option>
+                <option value="RAINING">Hujan (Wet)</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="flex justify-between items-center text-slate-400 mb-1 font-semibold text-xs">
+                <span>Rambut & Aksesoris</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('hairAccSelect', this)"></i>
+            </label>
+            <select id="hairAccSelect" onchange="triggerGenerate()" class="w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2 outline-none focus:border-red-500 cursor-pointer">
+                <option value="RANDOM">🎲 Bebas Berkreasi</option>
+                <option value="MATCH_STRICT" class="font-bold text-red-300">🔒 Sesuai Foto (Strict)</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="flex justify-between items-center text-slate-400 mb-1 font-semibold text-xs">
+                <span>AI Face Rules</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('strictSelect', this)"></i>
+            </label>
+            <select id="strictSelect" onchange="toggleStrictLevel(); triggerGenerate();" class="w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2 outline-none focus:border-red-500 cursor-pointer">
+                <option value="FLEXIBLE">🎨 Bebas (Flexible)</option>
+                <option value="STRICT">🔒 Ketat Wajah (Strict)</option>
+            </select>
+        </div>
+
+        <div id="strictLevelContainer" class="hidden">
+            <label class="block text-red-400 mb-1 font-semibold text-xs"><i class="fa-solid fa-weight-hanging"></i> Bobot Strict Wajah</label>
+            <input type="number" id="strictWeight" min="0.1" max="1.0" step="0.1" value="1.0"
+                   oninput="triggerGenerate()"
+                   class="w-full bg-slate-900 text-slate-200 border border-red-600 rounded p-2 outline-none focus:border-red-500">
+        </div>
+
+        <div class="col-span-1 sm:col-span-2">
+            <label class="flex justify-between items-center text-green-400 mb-1 font-semibold text-xs">
+                <span><i class="fa-solid fa-user-tag"></i> Artis/Tokoh Utama (Opsional)</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('customNameGlobal', this)"></i>
+            </label>
+            <input type="text" id="customNameGlobal" oninput="handleGlobalNameInput()"
+                   placeholder="Cth: Reza Rahadian"
+                   class="w-full bg-slate-900 text-green-300 border border-green-700 rounded p-2 outline-none focus:border-green-500 placeholder-slate-500">
+        </div>
+
+        <div class="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4">
+            <label class="flex justify-between items-center text-green-400 mb-1 font-semibold text-xs">
+                <span><i class="fa-solid fa-clapperboard"></i> Skenario / Pose Manual (Opsional)</span>
+                <i role="button" tabindex="0" class="fa-solid fa-lock-open lock-icon unlocked cursor-pointer hover:text-white"
+                   onclick="toggleLock('customScenarioInput', this)"></i>
+            </label>
+            <input type="text" id="customScenarioInput" oninput="triggerGenerate()"
+                   placeholder="Cth: Duduk bersandar main HP"
+                   class="w-full bg-slate-900 text-green-300 border border-green-700 rounded p-2 outline-none focus:border-green-500 placeholder-slate-500">
+        </div>
+    </div>
+
+    <!-- Advanced toggle -->
+    <div class="w-full mb-2 flex justify-between px-1">
+        <div class="text-xs text-slate-500 hidden md:block">*Klik gembok agar opsi tidak ikut teracak.</div>
+        <label class="cursor-pointer flex items-center gap-2 text-slate-300 text-sm font-bold bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 hover:bg-slate-700 transition-colors shadow-lg">
+            <input type="checkbox" id="advancedToggle" onchange="toggleAdvanced();" class="w-4 h-4 accent-red-500 rounded cursor-pointer">
+            <i class="fa-solid fa-sliders"></i> Atur Spesifik Tiap Orang (Advanced)
+        </label>
+    </div>
+
+    <div id="advancedPanel" class="hidden w-full bg-slate-800/80 p-5 rounded-xl border border-red-900/50 shadow-inner text-sm mb-8">
+        <h3 class="text-red-400 font-bold border-b border-red-900/50 pb-2 mb-4">
+            <i class="fa-solid fa-users-viewfinder"></i> Kustomisasi Karakter Independen
+        </h3>
+        <div id="characterRows" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8 w-full max-w-6xl mx-auto">
+        <button onclick="resetAndGenerate()"
+            class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white text-md font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-dice text-xl"></i> ACAK SEMUA
+        </button>
+        <button onclick="generatePromptNow()" id="generateBtn"
+            class="px-8 py-4 bg-red-600 hover:bg-red-500 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-red-500/50 transition-all flex items-center justify-center gap-3 transform hover:scale-105">
+            <i class="fa-solid fa-wand-magic-sparkles text-2xl"></i> GENERATE PROMPT
+        </button>
+    </div>
+
+    <!-- Output -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+
+        <div class="relative bg-slate-800 rounded-xl border border-slate-700 shadow-xl overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-700">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-align-left text-emerald-400"></i>
+                    <span class="text-sm text-slate-300 font-bold tracking-wider">PROMPT NATURAL (TEXT)</span>
+                </div>
+                <button onclick="copyToClipboard('natural')" id="copyBtnNatural"
+                    class="text-xs px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded transition-all flex items-center gap-2">
+                    <i class="fa-regular fa-copy"></i> Salin
+                </button>
+            </div>
+            <pre id="textOutputNatural" class="p-4 flex-1 overflow-x-auto text-sm font-mono leading-relaxed text-emerald-200 max-h-[600px] overflow-y-auto whitespace-pre-wrap" aria-live="polite">// Memuat paragraf...</pre>
+        </div>
+
+        <div class="relative bg-slate-800 rounded-xl border border-slate-700 shadow-xl overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-700">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-image text-blue-400"></i>
+                    <span class="text-sm text-slate-300 font-bold tracking-wider">JSON FOTO (DEV)</span>
+                </div>
+                <button onclick="copyToClipboard('photo')" id="copyBtnPhoto"
+                    class="text-xs px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded transition-all flex items-center gap-2">
+                    <i class="fa-regular fa-copy"></i> Salin
+                </button>
+            </div>
+            <pre id="jsonOutputPhoto" class="p-4 flex-1 overflow-x-auto text-sm font-mono leading-relaxed text-blue-300 max-h-[600px] overflow-y-auto whitespace-pre-wrap" aria-live="polite">// Memuat...</pre>
+        </div>
+
+        <div class="relative bg-slate-800 rounded-xl border border-slate-700 shadow-xl overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-700">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-video text-purple-400"></i>
+                    <span class="text-sm text-slate-300 font-bold tracking-wider">JSON VIDEO (DEV)</span>
+                </div>
+                <button onclick="copyToClipboard('video')" id="copyBtnVideo"
+                    class="text-xs px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded transition-all flex items-center gap-2">
+                    <i class="fa-regular fa-copy"></i> Salin
+                </button>
+            </div>
+            <pre id="jsonOutputVideo" class="p-4 flex-1 overflow-x-auto text-sm font-mono leading-relaxed text-purple-300 max-h-[600px] overflow-y-auto whitespace-pre-wrap" aria-live="polite">// Memuat...</pre>
+        </div>
+
+    </div>
+</div><!-- /mainContent -->
+
+<!-- ================================================================ -->
+<!-- MAIN APPLICATION SCRIPT                                           -->
+<!-- ================================================================ -->
+<script>
+// ============================================================
+// LOCK STATE — centralized, not scattered per-element
+// ============================================================
+const lockState = {};
+
+function isLocked(id) { return lockState[id] === true; }
+
+function toggleLock(id, iconEl) {
+    lockState[id] = !lockState[id];
+    const locked = lockState[id];
+    if (iconEl) {
+        iconEl.classList.toggle('fa-lock', locked);
+        iconEl.classList.toggle('fa-lock-open', !locked);
+        iconEl.classList.toggle('locked', locked);
+        iconEl.classList.toggle('unlocked', !locked);
+    }
+    // Apply visual feedback to the target element
+    const el = document.getElementById(id);
+    if (el) {
+        if (el.tagName === 'SELECT' || (el.tagName === 'INPUT' && el.type !== 'hidden')) {
+            el.style.borderColor = locked ? '#ef4444' : '';
+            el.style.opacity = locked ? '0.7' : '';
+        }
+    }
+}
+
+// Dedicated lock toggles for list-based hidden inputs
+function toggleLocLock() {
+    const iconEl = document.getElementById('locLockIcon');
+    lockState['locSelect'] = !lockState['locSelect'];
+    const locked = lockState['locSelect'];
+    iconEl.classList.toggle('fa-lock', locked);
+    iconEl.classList.toggle('fa-lock-open', !locked);
+    iconEl.classList.toggle('locked', locked);
+    iconEl.classList.toggle('unlocked', !locked);
+    const container = document.getElementById('locListContainer');
+    if (container) {
+        container.classList.toggle('locked-border', locked);
+    }
+}
+function toggleCamLock() {
+    const iconEl = document.getElementById('camLockIcon');
+    lockState['cameraSelect'] = !lockState['cameraSelect'];
+    const locked = lockState['cameraSelect'];
+    iconEl.classList.toggle('fa-lock', locked);
+    iconEl.classList.toggle('fa-lock-open', !locked);
+    iconEl.classList.toggle('locked', locked);
+    iconEl.classList.toggle('unlocked', !locked);
+    document.getElementById('cameraListContainer')?.classList.toggle('locked-border', locked);
+}
+function toggleAesLock() {
+    const iconEl = document.getElementById('aesLockIcon');
+    lockState['aestheticSelect'] = !lockState['aestheticSelect'];
+    const locked = lockState['aestheticSelect'];
+    iconEl.classList.toggle('fa-lock', locked);
+    iconEl.classList.toggle('fa-lock-open', !locked);
+    iconEl.classList.toggle('locked', locked);
+    iconEl.classList.toggle('unlocked', !locked);
+    document.getElementById('aesListContainer')?.classList.toggle('locked-border', locked);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getRandom(arr) {
+    if (!arr || arr.length === 0) return "";
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getVal(id) {
+    const el = document.getElementById(id);
+    return el ? el.value : "";
+}
+
+function isMirrorFriendly(envName) {
+    if (!envName) return false;
+    const kw = ["BATHROOM","BEDROOM","KOS","CAFE","MALL","CLUB","RESTROOM","TOILET","CORNER","ROOM","COMPOUND","CAR","INNOVA","MERCEDES","ALPHARD","THRIFT","STORE","ELEVATOR","BED","LAUNDROMAT","PHOTOBOOTH","CONVEX","CERMIN","WARUNG","BARBERSHOP","STUDIO","KLINIK","KTP"];
+    return kw.some(k => envName.toUpperCase().includes(k));
+}
+
+function getWeightedEra() {
+    const total = eraWeights.reduce((s, e) => s + e.weight, 0);
+    let r = Math.random() * total;
+    for (const era of eraWeights) {
+        if (r < era.weight) return era.id;
+        r -= era.weight;
+    }
+    return "MODERN_2020S";
+}
+
+// ============================================================
+// DEBOUNCED GENERATE
+// ============================================================
+let _genTimer = null;
+
+function triggerGenerate(delay = 150) {
+    clearTimeout(_genTimer);
+    _genTimer = setTimeout(generatePromptCore, delay);
+}
+
+function generatePromptNow() {
+    clearTimeout(_genTimer);
+    generatePromptCore();
+}
+
+// ============================================================
+// RADIO LIST BUILDER
+// ============================================================
+function createRadioOption(name, value, label, selectedValue, subText = "") {
+    const checked = value === selectedValue ? "checked" : "";
+    const bg = checked ? "bg-slate-700 border-slate-500 shadow-inner" : "border-transparent hover:border-slate-600 hover:bg-slate-700/50";
+    const sub = subText ? `<div class="text-[10px] text-slate-400 leading-tight mt-1 line-clamp-2">${subText}</div>` : "";
+    return `
+    <label class="flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all border w-full radio-label ${bg}">
+        <input type="radio" name="${name}" value="${value}" ${checked} class="mt-0.5 accent-red-500 w-4 h-4 shrink-0 cursor-pointer radio-input">
+        <div class="flex flex-col flex-1 pointer-events-none">
+            <span class="text-sm text-slate-200 font-semibold leading-tight">${label}</span>${sub}
+        </div>
+    </label>`;
+}
+
+function setupListDelegation(containerId, hiddenId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.addEventListener('change', (e) => {
+        if (!e.target.classList.contains('radio-input')) return;
+        document.getElementById(hiddenId).value = e.target.value;
+        container.querySelectorAll('.radio-label').forEach(l => {
+            l.classList.remove('bg-slate-700','border-slate-500','shadow-inner');
+            l.classList.add('border-transparent','hover:border-slate-600','hover:bg-slate-700/50');
+        });
+        const parent = e.target.closest('.radio-label');
+        if (parent) {
+            parent.classList.add('bg-slate-700','border-slate-500','shadow-inner');
+            parent.classList.remove('border-transparent','hover:border-slate-600','hover:bg-slate-700/50');
+        }
+        triggerGenerate();
+    });
+}
+
+// ============================================================
+// RENDER LOCATION LIST
+// ============================================================
+function renderLocationList() {
+    if (isLocked('locSelect')) return;
+    const container = document.getElementById('locListContainer');
+    const locInput  = document.getElementById('locSelect');
+    const eraVal    = getVal('eraSelect');
+    if (!container || !locInput) return;
+
+    let currentVal = locInput.value;
+    let html = createRadioOption('locRadio', 'RANDOM', '🎲 Acak Lokasi', currentVal, "Lokasi otomatis menyesuaikan Era");
+
+    let validFound = (currentVal === 'RANDOM');
+
+    settings.forEach((s, i) => {
+        if (eraVal === "RANDOM" || s.era_id === eraVal) {
+            const idxStr = i.toString();
+            if (currentVal === idxStr) validFound = true;
+            html += createRadioOption('locRadio', idxStr, s.env, currentVal, s.arch);
+        }
+    });
+
+    // If current selection no longer visible after era change, reset
+    if (!validFound) {
+        locInput.value = 'RANDOM';
+        html = html.replace(`value="RANDOM"`, `value="RANDOM" checked`);
+    }
+
+    container.innerHTML = html;
+}
+
+// ============================================================
+// RENDER CAMERA LIST
+// ============================================================
+function renderCameraList() {
+    if (isLocked('cameraSelect')) return;
+    const container = document.getElementById('cameraListContainer');
+    const camInput  = document.getElementById('cameraSelect');
+    if (!container || !camInput) return;
+    const val = camInput.value;
+
+    let html = createRadioOption('camRadio','RANDOM','🎲 Acak Gaya Kamera',val,"Otomatis menyesuaikan skenario");
+
+    const sections = [
+        { label: "🖼️ Image Reference", items: [
+            {v:"MATCH_POSE", l:"🧍 Jiplak Pose & Angle Gambar", s:"Memaksa AI meniru pose & angle dari gambar referensi"}
+        ]},
+        { label: "🤳 Selfie & POV", items: [
+            {v:"SELFIE_STANDARD",        l:"Selfie Standar",           s:"Sejajar wajah"},
+            {v:"SELFIE_05X_TOPDOWN_POV", l:"0.5x Top-Down POV (Gen-Z)",s:"Kamera di atas kepala, foreshortening kaki"},
+            {v:"SELFIE_HIGH_ANGLE",      l:"Selfie High Angle",        s:"Dari atas (estetik)"},
+            {v:"SELFIE_LOW_ANGLE",       l:"Selfie Low Angle",         s:"Dari bawah dagu"},
+            {v:"SELFIE_WIDE",            l:"Selfie 0.5x Wide",         s:"Lensa lebar, distorsi sudut"},
+            {v:"SELFIE_CLOSEUP",         l:"Selfie Close-Up",          s:"Sangat dekat ke wajah"},
+            {v:"ANGLE_POV",              l:"First-Person POV",         s:"Sudut pandang mata subjek"}
+        ]},
+        { label: "🪞 Mirror Selfie", items: [
+            {v:"MIRROR_STANDARD",  l:"Mirror Selfie",         s:"Foto lurus di depan cermin"},
+            {v:"MIRROR_WIDE",      l:"Mirror Wide 0.5x",      s:"Lensa ultra wide di kaca"},
+            {v:"MIRROR_FACELESS",  l:"Faceless Mirror",       s:"HP sepenuhnya menutupi wajah"}
+        ]},
+        { label: "📐 Ukuran Shot (Framing)", items: [
+            {v:"PORTRAIT_CLOSE_UP", l:"Portrait Close-Up", s:"Bahu/Dada ke atas"},
+            {v:"FRAMING_MEDIUM",    l:"Medium Shot (MS)",   s:"Pinggang ke atas"},
+            {v:"FRAMING_LONG",      l:"Long Shot (LS)",     s:"Full Body"},
+            {v:"FRAMING_WIDE",      l:"Extreme Long Shot",  s:"Subjek kecil, background luas"}
+        ]},
+        { label: "🎯 Sudut Angle (Posed)", items: [
+            {v:"POSED_EYE_LEVEL",  l:"Eye Level",          s:"Sejajar rata mata subjek"},
+            {v:"POSED_HIGH_ANGLE", l:"High Angle",         s:"Kamera menatap ke bawah"},
+            {v:"POSED_LOW_ANGLE",  l:"Low Angle",          s:"Kamera menatap ke atas"},
+            {v:"ANGLE_BIRD_EYE",   l:"Bird's Eye View",    s:"Tegak lurus 90° dari atas kepala"},
+            {v:"ANGLE_FROG_EYE",   l:"Frog/Worm's Eye",   s:"Kamera di tanah/lantai"},
+            {v:"ANGLE_DUTCH",      l:"Dutch Angle",         s:"Kamera dimiringkan sengaja"}
+        ]},
+        { label: "🫣 Candid & Lainnya", items: [
+            {v:"CANDID_UNAWARE",     l:"Candid Asli",           s:"Aktivitas natural, tidak lihat kamera"},
+            {v:"CANDID_INTENTIONAL", l:"Candid Pura-Pura",      s:"Sadar kamera, aesthetic berpaling"},
+            {v:"CANDID_OTS",         l:"Over the Shoulder (OTS)",s:"Dari belakang bahu"},
+            {v:"CANDID_TELEPHOTO",   l:"Telephoto Shot",        s:"Paparazzi zoom jarak jauh"},
+            {v:"ACCIDENTAL",         l:"Accidental Blur",       s:"Tidak sengaja terjepret, shaky/blur"}
+        ]},
+        { label: "📹 Sudut Ekstrem", items: [
+            {v:"EXTREME_CCTV",    l:"Kamera CCTV",       s:"Sudut tinggi pojok ruangan"},
+            {v:"EXTREME_FISHEYE", l:"Action Cam Fisheye",s:"Lensa 8mm sangat cembung"}
+        ]}
+    ];
+
+    sections.forEach(sec => {
+        html += `<div class="text-xs font-bold text-orange-400 mt-3 mb-1 px-2 border-b border-slate-700 pb-1">${sec.label}</div>`;
+        sec.items.forEach(a => { html += createRadioOption('camRadio', a.v, a.l, val, a.s); });
+    });
+
+    container.innerHTML = html;
+}
+
+// ============================================================
+// RENDER AESTHETIC LIST
+// ============================================================
+function renderAestheticList() {
+    if (isLocked('aestheticSelect')) return;
+    const container = document.getElementById('aesListContainer');
+    const aesInput  = document.getElementById('aestheticSelect');
+    if (!container || !aesInput) return;
+    const val = aesInput.value;
+
+    let html = createRadioOption('aesRadio','DEFAULT','📷 Default (Bawaan)',val,"Tidak ada filter ekstra");
+    html    += createRadioOption('aesRadio','RANDOM','🎲 Acak Aesthetic',val,"Biarkan AI memilih secara acak");
+    html    += `<div class="text-xs font-bold text-purple-400 mt-3 mb-1 px-2 border-b border-slate-700 pb-1">Daftar Filter & Style</div>`;
+
+    for (const [key, data] of Object.entries(aestheticFilters)) {
+        html += createRadioOption('aesRadio', key, data.label || key.replace(/_/g,' '), val, data.cameraType);
+    }
+    container.innerHTML = html;
+}
+
+// ============================================================
+// SHOT TYPE RESOLVER
+// ============================================================
+function getShotTypeData(eraId, cameraStyle, numSubjects, genderVal, customScenario, envName) {
+    let mirrorOk = isMirrorFriendly(envName);
+
+    const allStyles = [
+        "SELFIE_STANDARD","SELFIE_05X_TOPDOWN_POV","SELFIE_HIGH_ANGLE","SELFIE_LOW_ANGLE",
+        "SELFIE_WIDE","SELFIE_CLOSEUP","ANGLE_POV",
+        "MIRROR_STANDARD","MIRROR_WIDE","MIRROR_FACELESS",
+        "PORTRAIT_CLOSE_UP","FRAMING_MEDIUM","FRAMING_LONG","FRAMING_WIDE",
+        "POSED_EYE_LEVEL","POSED_HIGH_ANGLE","POSED_LOW_ANGLE","ANGLE_BIRD_EYE","ANGLE_FROG_EYE","ANGLE_DUTCH",
+        "CANDID_UNAWARE","CANDID_INTENTIONAL","CANDID_OTS","CANDID_TELEPHOTO","ACCIDENTAL",
+        "EXTREME_CCTV","EXTREME_FISHEYE"
+    ].filter(s => mirrorOk || !s.includes("MIRROR"));
+
+    let selected = cameraStyle;
+
+    if (selected === "RANDOM") {
+        const r = Math.random() * 100;
+        if      (r < 12) selected = "CANDID_UNAWARE";
+        else if (r < 22) selected = "SELFIE_STANDARD";
+        else if (r < 32) selected = "SELFIE_05X_TOPDOWN_POV";
+        else if (r < 42) selected = "POSED_EYE_LEVEL";
+        else if (r < 52) selected = "FRAMING_MEDIUM";
+        else if (r < 62) selected = "PORTRAIT_CLOSE_UP";
+        else selected = getRandom(allStyles);
+    } else if (selected.includes("MIRROR") && !mirrorOk) {
+        selected = "SELFIE_STANDARD";
+    }
+
+    let d = {
+        type: "POSED_SCENARIO", cameraModel: "SMARTPHONE CAMERA",
+        focal: "STANDARD PHONE LENS (24MM EQUIV)", angle: "EYE-LEVEL",
+        pose: "", gaze: "", vibe: ""
+    };
+
+    if (eraId === "Y2K_2000S")    d.cameraModel = "DIGICAM / FLIP PHONE CAMERA";
+    if (eraId === "GRUNGE_1990S") d.cameraModel = "DISPOSABLE FILM CAMERA";
+
+    // --- SELFIE ---
+    if (selected === "SELFIE_05X_TOPDOWN_POV") {
+        d.type       = "POV_ULTRAWIDE_SELFIE";
+        d.focal      = "0.5X ULTRA WIDE LENS DISTORTION, SMARTPHONE CAMERA";
+        d.angle      = "FIRST-PERSON POV SELFIE LOOKING DOWN AT OWN BODY, EXTREME HIGH-ANGLE";
+        d.pose       = "SITTING OR STANDING CASUALLY, LEGS EXTENDING FORWARD AND DOWNWARD INTO THE BACKGROUND. BOTH ARMS VISIBLE REACHING UP HOLDING THE CAMERA. OVERSIZED SHOE PERSPECTIVE, STRONG FORESHORTENING EFFECT";
+        d.gaze       = "LOOKING UP DIRECTLY INTO THE CAMERA LENS PLAYFULLY";
+        d.vibe       = "TRENDY GEN-Z 0.5X ULTRAWIDE SELFIE, EXAGGERATED FORESHORTENING";
+    } else if (selected.startsWith("SELFIE_") || selected === "ANGLE_POV") {
+        d.type = "FRONT_CAMERA_SELFIE";
+        d.vibe = "CASUAL FIRST-PERSON FRONT CAMERA SHOT";
+        if (selected === "SELFIE_STANDARD")    { d.angle = "EYE-LEVEL STRAIGHT ON SELFIE"; d.focal = "FRONT-FACING SELFIE LENS"; d.pose = getRandom(["MAKING A PEACE SIGN CLOSE TO FACE","SMILING WARMLY INTO THE LENS","DUCK FACE POUTING PLAYFULLY"]); }
+        if (selected === "SELFIE_HIGH_ANGLE")  { d.angle = "HIGH-ANGLE POV LOOKING DOWN"; d.focal = "FRONT-FACING SELFIE LENS"; d.pose = "HOLDING CAMERA HIGH, LOOKING UP PLAYFULLY"; }
+        if (selected === "SELFIE_LOW_ANGLE")   { d.angle = "LOW-ANGLE CHIN POV, SLIGHTLY LOOKING UP"; d.pose = "LOOKING DOWN AT THE CAMERA WITH COOL EXPRESSION"; }
+        if (selected === "SELFIE_WIDE")        { d.angle = "HIGH-ANGLE WIDE SELFIE, ARMS EXTENDED"; d.focal = "0.5X ULTRA WIDE LENS DISTORTION"; d.pose = "HOLDING CAMERA HIGH, SQUEEZING INTO FRAME WITH PLAYFUL EXAGGERATED PERSPECTIVE"; }
+        if (selected === "SELFIE_CLOSEUP")     { d.type = "CLOSE_UP_SELFIE"; d.angle = "EXTREME CLOSE-UP PORTRAIT"; d.focal = "SMARTPHONE PORTRAIT MACRO LENS"; d.pose = "FACE TAKING UP MOST OF FRAME, SKIN TEXTURE VISIBLE"; }
+        if (selected === "ANGLE_POV")          { d.type = "FIRST_PERSON_POV"; d.angle = "FIRST-PERSON POV"; d.focal = "WIDE ANGLE LENS (24MM)"; d.pose = "PHOTOGRAPHED FROM VIEWER'S PERSPECTIVE, SUBJECT'S HANDS MAY REACH INTO SCENE"; }
+        d.gaze = "DIRECT EYE CONTACT WITH THE LENS";
+
+    // --- MIRROR ---
+    } else if (selected.startsWith("MIRROR_")) {
+        d.type = "MIRROR_SELFIE"; d.vibe = "CLASSIC AESTHETIC MIRROR SELFIE"; d.angle = "STRAIGHT-ON MIRROR REFLECTION";
+        if (selected === "MIRROR_STANDARD")  d.pose = "HOLDING PHONE SHOWING OUTFIT IN THE MIRROR";
+        if (selected === "MIRROR_WIDE")      { d.pose = "MIRROR SELFIE CAPTURING ENTIRE ROOM BACKGROUND"; d.focal = "0.5X ULTRA WIDE LENS"; }
+        if (selected === "MIRROR_FACELESS")  d.pose = "HOLDING PHONE COMPLETELY COVERING THE FACE (SHY FACELESS AESTHETIC)";
+        d.gaze = "LOOKING AT THE PHONE SCREEN REFLECTED IN MIRROR";
+
+    // --- FRAMING ---
+    } else if (selected === "PORTRAIT_CLOSE_UP" || selected.startsWith("FRAMING_")) {
+        d.type = "POSED_SCENARIO"; d.vibe = "WELL-FRAMED PHOTOGRAPH"; d.gaze = "LOOKING AT THE CAMERA";
+        if (selected === "PORTRAIT_CLOSE_UP") { d.angle = "EYE-LEVEL CLOSE-UP"; d.pose = "FRAMING SUBJECT FROM SHOULDERS UP, INTIMATE PORTRAIT"; d.focal = "PORTRAIT LENS WITH SHALLOW DEPTH OF FIELD"; }
+        if (selected === "FRAMING_MEDIUM")    { d.angle = "EYE-LEVEL MEDIUM SHOT"; d.pose = "FRAMING FROM WAIST UP, CASUAL STANDING OR SITTING"; d.focal = "STANDARD LENS (35MM-50MM)"; }
+        if (selected === "FRAMING_LONG")      { d.angle = "EYE-LEVEL LONG SHOT"; d.pose = "FULL BODY FROM HEAD TO TOE, SHOWING ENTIRE OUTFIT"; d.focal = "STANDARD TO WIDE LENS"; }
+        if (selected === "FRAMING_WIDE")      { d.angle = "EXTREME LONG SHOT"; d.pose = "SUBJECT APPEARS SMALL, EMPHASIZING VAST SURROUNDING ENVIRONMENT"; d.focal = "ULTRA WIDE LENS (14MM-24MM)"; }
+
+    // --- POSED ANGLES ---
+    } else if (selected.startsWith("POSED_") || ["ANGLE_BIRD_EYE","ANGLE_FROG_EYE","ANGLE_DUTCH"].includes(selected)) {
+        d.type = "CREATIVE_ANGLE_SHOT"; d.vibe = "DYNAMIC AND CREATIVE PERSPECTIVE"; d.pose = "ADJUSTING POSE TO THE DYNAMIC CAMERA ANGLE";
+        if (selected === "POSED_EYE_LEVEL")  { d.angle = "EYE-LEVEL"; d.pose = "STANDING OR SITTING NATURALLY, PERFECTLY CENTERED"; d.gaze = "DIRECT EYE CONTACT WITH CAMERA"; }
+        if (selected === "POSED_HIGH_ANGLE") { d.angle = "HIGH ANGLE SHOT, LOOKING DOWN AT SUBJECT"; d.pose = "LOOKING UP SLIGHTLY TOWARDS CAMERA FROM BELOW"; d.gaze = "LOOKING UP AT CAMERA"; }
+        if (selected === "POSED_LOW_ANGLE")  { d.angle = "LOW ANGLE SHOT, LOOKING UP AT SUBJECT"; d.pose = "STANDING TALL, POWERFUL POSE LOOKING DOWN SLIGHTLY"; d.gaze = "LOOKING DOWN AT CAMERA"; }
+        if (selected === "ANGLE_BIRD_EYE")   { d.angle = "BIRD'S EYE VIEW, DIRECTLY OVERHEAD 90 DEGREES"; d.pose = "LAYING DOWN OR SITTING ON GROUND CAPTURED FROM DIRECTLY ABOVE"; d.focal = "WIDE ANGLE LENS LOOKING STRAIGHT DOWN"; }
+        if (selected === "ANGLE_FROG_EYE")   { d.angle = "WORM'S EYE VIEW, EXTREME LOW ANGLE"; d.pose = "CAMERA RESTING ON GROUND, SHOOTING DRAMATICALLY UPWARD"; d.focal = "WIDE ANGLE TO EXAGGERATE HEIGHT"; }
+        if (selected === "ANGLE_DUTCH")      { d.angle = "DUTCH ANGLE / CANTED, INTENTIONALLY TILTED"; d.vibe = "EDGY, DISORIENTING, DYNAMIC STREET VIBE"; d.pose = "CASUAL POSE BUT HORIZON LINE IS TILTED"; }
+
+    // --- CANDID ---
+    } else if (selected.startsWith("CANDID_") || selected === "ACCIDENTAL") {
+        d.type = "CANDID_UNAWARE"; d.angle = "EYE-LEVEL FROM A DISTANCE"; d.vibe = "TRUE CANDID, UNAWARE OF CAMERA"; d.gaze = "AVERTING GAZE, FOCUSED ON SOMETHING ELSE";
+        if (selected === "CANDID_UNAWARE")     d.pose = "DEEP IN THOUGHT OR FOCUSED ON AN ACTIVITY NATURALLY";
+        if (selected === "CANDID_TELEPHOTO")   { d.angle = "TELEPHOTO PAPARAZZI SHOT FROM FAR AWAY"; d.focal = "TELEPHOTO ZOOM LENS (85MM+) WITH HIGH COMPRESSION"; d.pose = "WALKING OR SITTING NATURALLY, OBLIVIOUS TO BEING PHOTOGRAPHED"; }
+        if (selected === "CANDID_OTS")         { d.angle = "OVER THE SHOULDER (OTS)"; d.pose = "TAKEN FROM BEHIND SOMEONE ELSE'S SHOULDER, LOOKING AT MAIN SUBJECT"; d.vibe = "VOYEURISTIC, CONVERSATIONAL PERSPECTIVE"; }
+        if (selected === "CANDID_INTENTIONAL") { d.type = "CANDID_INTENTIONAL"; d.pose = "LAUGHING PLAYFULLY WHILE LOOKING AWAY, AESTHETIC PLANNED CANDID POSE"; d.vibe = "PLANNED CANDID / AESTHETIC OUTFIT SHOT"; }
+        if (selected === "ACCIDENTAL")         { d.type = "ACCIDENTAL_AWKWARD_SHOT"; d.angle = "TILTED DUTCH ANGLE, SHAKY BLUR"; d.pose = "BLURRY MID-MOVEMENT LIKE THEY JUST BUMPED THE CAMERA"; d.vibe = "FAILED/ACCIDENTAL PHOTO, RAW, CHAOTIC, NOSTALGIC"; d.gaze = "UNCOORDINATED GAZE"; }
+
+    // --- EXTREMES ---
+    } else if (selected === "EXTREME_CCTV") {
+        d.type = "CANDID_UNAWARE"; d.angle = "SECURITY CAMERA CCTV POV, HIGH ANGLE WIDE CORNER SHOT"; d.focal = "CCTV WIDE ANGLE LENS"; d.pose = "WALKING OR STANDING NATURALLY, CAUGHT ON TAPE"; d.vibe = "RAW SECURITY FOOTAGE AESTHETIC"; d.gaze = "UNAWARE";
+    } else if (selected === "EXTREME_FISHEYE") {
+        d.type = "CREATIVE_ANGLE_SHOT"; d.angle = "EXTREME FISHEYE DISTORTION, BULGING CENTER"; d.focal = "8MM FISHEYE ACTION CAM LENS"; d.pose = "LEANING IN VERY CLOSE TO THE BULGING LENS PLAYFULLY"; d.gaze = "LOOKING DIRECTLY AT LENS";
+    }
+
+    // Override pose for multi-person without custom scenario
+    if (numSubjects > 1 && !customScenario && !selected.includes("SELFIE") && !selected.includes("MIRROR")) {
+        if (genderVal === "COUPLE") d.pose = "COUPLE STANDING ARM IN ARM OR HUGGING, SMILING AT THE CAMERA";
+        else d.pose = `GROUP OF ${numSubjects} HANGING OUT, POSING TOGETHER CASUALLY`;
+    }
+
+    if (customScenario) {
+        d.pose = customScenario.toUpperCase();
+        d.gaze = "ENGAGED IN THE SPECIFIC SCENARIO";
+    }
+
+    return d;
+}
+
+// ============================================================
+// SUBJECT / GENDER / AGE BUILDER
+// ============================================================
+function buildSubject(forcedGender, forcedAge, bodyTypeVal) {
+    // Age prefix
+    let agePrefix = "A YOUNG";
+    if (forcedAge === "TEENAGER")    agePrefix = "A TEENAGE";
+    else if (forcedAge === "YOUNG_ADULT") agePrefix = "A YOUNG ADULT";
+    else if (forcedAge === "ADULT")  agePrefix = "A 30-YEAR-OLD";
+    else if (forcedAge === "MATURE") agePrefix = "A MIDDLE-AGED";
+    else {
+        const r = Math.random() * 100;
+        if (r < 40) agePrefix = "A YOUNG";
+        else if (r < 70) agePrefix = "A TEENAGE";
+        else if (r < 88) agePrefix = "A 30-YEAR-OLD";
+        else agePrefix = "A MIDDLE-AGED";
+    }
+
+    // Gender
+    let genderId = forcedGender;
+    if (!genderId || genderId === "RANDOM") genderId = Math.random() < 0.5 ? "FEMALE" : "MALE";
+
+    // Body type
+    let bodyDesc = "";
+    if (bodyTypeVal && bodyTypeVal !== "MATCH" && bodyTypeVal !== "RANDOM") bodyDesc = bodyTypeVal + " ";
+    else if (bodyTypeVal === "RANDOM") bodyDesc = getRandom(["SLIM AND PETITE ","THICK AND CURVY ","MUSCULAR AND TONED ","CHUBBY ",""]);
+
+    const genderWord = genderId === "FEMALE"
+        ? (agePrefix === "A TEENAGE" ? "GIRL" : "WOMAN")
+        : (agePrefix === "A TEENAGE" ? "BOY"  : "MAN");
+
+    return {
+        genderId,
+        subjectName: `${agePrefix} ${bodyDesc}${genderWord}`.replace(/\s+/g,' ').trim()
+    };
+}
+
+// ============================================================
+// WARDROBE BUILDER
+// ============================================================
+function buildWardrobe(genderId, eraId, activeHoliday, envName, customName, shotType) {
+    let pool = { hair:[], tops:[], bottoms:[], shoes:[], acc:[] };
+
+    // Source: holiday wardrobe takes priority
+    if (activeHoliday && holidayWardrobeDB[activeHoliday]?.[genderId]) {
+        const h = holidayWardrobeDB[activeHoliday][genderId];
+        pool.hair    = [...(h.hair    || [])];
+        pool.tops    = [...(h.tops    || [])];
+        pool.bottoms = [...(h.bottoms || [])];
+        pool.shoes   = [...(h.shoes   || [])];
+        pool.acc     = [...(h.acc     || [])];
+    } else {
+        const eraData = wardrobeDB[eraId] || wardrobeDB["MODERN_2020S"];
+        const g = eraData[genderId] || eraData["MALE"];
+        pool.hair    = [...(g.hair    || [])];
+        pool.tops    = [...(g.tops    || [])];
+        pool.bottoms = [...(g.bottoms || [])];
+        pool.shoes   = [...(g.shoes   || [])];
+        pool.acc     = [...(g.acc     || [])];
+    }
+
+    // Context-based pool augmentations (same logic as original, kept intact)
+    if (envName) {
+        const env = envName.toUpperCase();
+
+        if (env.includes("CONCERT") || env.includes("STAGE") || env.includes("BACKSTAGE")) {
+            if (genderId === "MALE") { pool.tops.push("BLACK SLEEVELESS BAND SHIRT","OPEN LEATHER JACKET WITH NO SHIRT","OVERSIZED VINTAGE BAND T-SHIRT"); pool.acc.push("SILVER CHAIN NECKLACE","HOLDING A MICROPHONE","ELECTRIC GUITAR SLUNG OVER SHOULDER"); }
+            else { pool.tops.push("EDGY CROP TOP WITH FISHNET ACCENTS","OVERSIZED BAND T-SHIRT AS DRESS","BLACK LEATHER CORSET"); pool.bottoms.push("BLACK CARGO PANTS WITH CHAINS","PLEATED PLAID SKIRT WITH FISHNETS"); pool.acc.push("CHUNKY SILVER CHAIN NECKLACE","HOLDING A MICROPHONE"); }
+            if (env.includes("BACKSTAGE")) pool.acc.push("HOLDING A BACKSTAGE VIP LANYARD PASS");
+        }
+        if (env.includes("TENNIS")) {
+            pool.tops.push("PLAIN POLO SHIRT"); pool.bottoms.push("NAVY ATHLETIC SHORTS");
+            if (genderId === "FEMALE") pool.bottoms.push("PLEATED TENNIS SKIRT");
+            pool.acc.push("HOLDING A TENNIS RACKET");
+        }
+        if (env.includes("MOTORCYCLE") || env.includes("SCOOTER") || env.includes("VESPA")) {
+            pool.tops.push("STRIPED SHIRT UNBUTTONED AT CHEST"); pool.acc.push("WEARING A RETRO BOGO HELMET");
+        }
+        if (env.includes("PADDLEBOARDING") || env.includes("BOAT") || env.includes("RIVER")) {
+            pool.acc.push("LIFE VEST");
+        }
+        if (env.includes("BEACH") && !env.includes("NIGHT")) {
+            pool.acc.push("SNORKELING MASK PUSHED UP ON FOREHEAD","FLORAL BEACH SARONG TIED AT WAIST");
+        }
+        if (env.includes("STADIUM") || env.includes("GBK")) {
+            pool.tops.push("RED FOOTBALL CLUB JERSEY","WHITE NATIONAL TEAM JERSEY");
+        }
+        if (env.includes("COUCH") || env.includes("BEDROOM") || env.includes("KOS")) {
+            pool.acc.push("HOLDING A VIDEO GAME CONTROLLER");
+            if (genderId === "FEMALE") { pool.acc.push("FLUFFY SKINCARE HEADBAND"); pool.bottoms.push("PATTERNED LOUNGE PANTS"); }
+        }
+        if (env.includes("KONDANGAN") || env.includes("WEDDING RECEPTION")) {
+            if (genderId === "MALE") { pool.tops = ["BATIK LENGAN PANJANG","FULL BLACK SUIT AND TIE"]; pool.bottoms = ["CELANA BAHAN FORMAL HITAM"]; pool.shoes = ["SEPATU PANTOFEL HITAM"]; }
+            else { pool.tops = ["KEBAYA MODERN HIJAB","GAMIS ELEGAN"]; pool.bottoms = ["KAIN BATIK LILIT","LONG SKIRT"]; pool.shoes = ["HIGH HEELS","ELEGANT FLATS"]; pool.acc.push("TAS TANGAN MEWAH"); }
+        }
+        if (env.includes("STUDIO FOTO KTP")) {
+            pool.tops = genderId === "MALE" ? ["PLAIN BLACK T-SHIRT","CRISP WHITE CREWNECK TEE","CASUAL BUTTON-DOWN SHIRT"] : ["PLAIN WHITE BLOUSE","SIMPLE NEAT TOP"];
+            pool.hair = genderId === "MALE" ? ["SHORT NEAT BLACK HAIR","CASUAL CREW CUT"] : ["NEAT HAIR UPDO","NEAT BOB"];
+            pool.acc = ["NONE"];
+        }
+        if (env.includes("LUXURY AIRLINE") || env.includes("PRIVATE JET")) {
+            if (genderId === "FEMALE") { pool.tops.push("ELEGANT BLAZER OVER CAMISOLE"); pool.acc.push("LUXURY CARRY-ON BAG"); }
+            else { pool.tops.push("CRISP SHIRT WITH BLAZER"); }
+        }
+        if (env.includes("WATERPARK") || env.includes("KOLAM RENANG") || env.includes("POOLSIDE")) {
+            pool.tops = genderId === "FEMALE" ? ["BIKINI TOP (MODEST COVERAGE)","ONE-PIECE SWIMSUIT"] : ["SWIM SHORTS (NO SHIRT)"];
+            pool.bottoms = genderId === "FEMALE" ? ["BIKINI BOTTOM","SWIM SHORTS"] : ["BOARD SHORTS"];
+            pool.shoes = ["FLIP FLOPS","BARE FEET"];
+            pool.acc = genderId === "FEMALE" ? ["SUNGLASSES (ROUND OR CAT-EYE)","STRAW HAT","POOL FLOAT"] : ["SUNGLASSES","SWIM CAP"];
+        }
+    }
+
+    // Safety fallbacks
+    if (pool.tops.length    === 0) pool.tops    = ["PLAIN T-SHIRT"];
+    if (pool.bottoms.length === 0) pool.bottoms = ["PLAIN PANTS"];
+    if (pool.shoes.length   === 0) pool.shoes   = ["CASUAL SNEAKERS"];
+    if (pool.hair.length    === 0) pool.hair    = ["NATURAL HAIR"];
+    if (pool.acc.length     === 0) pool.acc     = ["NONE"];
+
+    // Filter hijab for named celebrities
+    if (customName) {
+        const nonHijab = pool.hair.filter(h => !h.includes("HIJAB") && !h.includes("PASHMINA"));
+        if (nonHijab.length > 0) pool.hair = nonHijab;
+    }
+
+    // Remove phone props when shot type would conflict
+    const selfieTypes = ["FRONT_CAMERA_SELFIE","CLOSE_UP_SELFIE","CANDID_INTENTIONAL","POSED_SCENARIO"];
+    const phoneConflictEnvs = ["ELEVATOR","STADIUM","BRIDGE","DARK ROOM"];
+    const envUp = envName ? envName.toUpperCase() : "";
+    const hasPhoneConflictEnv = phoneConflictEnvs.some(e => envUp.includes(e));
+    if (selfieTypes.includes(shotType) && !hasPhoneConflictEnv) {
+        pool.acc = pool.acc.filter(a => !a.toUpperCase().includes("PHONE"));
+        if (pool.acc.length === 0) pool.acc = ["NONE"];
+    }
+
+    const w = {
+        hair:   getRandom(pool.hair),
+        top:    getRandom(pool.tops),
+        bottom: getRandom(pool.bottoms),
+        shoe:   getRandom(pool.shoes),
+        acc:    getRandom(pool.acc)
+    };
+
+    // Hijab modesty override
+    if (w.hair && (w.hair.includes("HIJAB") || w.hair.includes("PASHMINA"))) {
+        if (!activeHoliday) {
+            w.top    = getRandom(["OVERSIZED LONG SLEEVE SHIRT","KNIT CARDIGAN OVER T-SHIRT","LONG TUNIC","LONG FLANNEL SHIRT BUTTONED UP"]);
+            w.bottom = getRandom(["BAGGY MOM JEANS","WIDE-LEG CULLOTES","LONG PLEATED SKIRT","MAXI SKIRT"]);
+        }
+    }
+
+    return w;
+}
+
+// ============================================================
+// ADVANCED PANEL
+// ============================================================
+function toggleAdvanced() {
+    const panel  = document.getElementById('advancedPanel');
+    const toggle = document.getElementById('advancedToggle');
+    if (toggle.checked) {
+        panel.classList.remove('hidden');
+        renderAdvancedRows();
+    } else {
+        panel.classList.add('hidden');
+    }
+    triggerGenerate(300);
+}
+
+function onNumOrGenderChange() {
+    const toggle = document.getElementById('advancedToggle');
+    if (toggle?.checked) {
+        // Save existing lock state before re-render
+        renderAdvancedRows();
+    }
+    triggerGenerate();
+}
+
+function renderAdvancedRows() {
+    const numEl    = document.getElementById('numSelect');
+    const genderEl = document.getElementById('genderSelect');
+    const container= document.getElementById('characterRows');
+    if (!numEl || !genderEl || !container) return;
+
+    const numVal   = numEl.value;
+    const genderVal= genderEl.value;
+    let num = numVal === "RANDOM" ? Math.floor(Math.random() * 6) + 1 : parseInt(numVal);
+    if (isNaN(num) || num < 1) num = 1;
+    if (genderVal === "COUPLE") num = 2;
+
+    // BUGFIX: Save state BEFORE clearing innerHTML
+    const savedState = [];
+    for (let i = 0; i < container.children.length; i++) {
+        const s = {};
+        ['name','gender','age','demo'].forEach(f => {
+            const el = document.getElementById(`adv_${f}_${i}`);
+            if (el) s[f] = { value: el.value, locked: isLocked(`adv_${f}_${i}`) };
+        });
+        savedState.push(s);
+    }
+
+    // If count unchanged, no need to rebuild
+    if (container.children.length === num) return;
+
+    container.innerHTML = "";
+
+    const demoOptions = demographics.map(d => `<option value="${d}">${d}</option>`).join('');
+
+    for (let i = 0; i < num; i++) {
+        let defaultGender = genderVal === "COUPLE" ? (i === 0 ? "MALE" : "FEMALE")
+                           : (genderVal !== "RANDOM" ? genderVal : "RANDOM");
+
+        // Restore saved state if available
+        const s = savedState[i] || {};
+        const nameVal   = s.name?.value   || "";
+        const genVal    = s.gender?.value  || defaultGender;
+        const ageVal    = s.age?.value     || "RANDOM";
+        const demoVal   = s.demo?.value    || "RANDOM";
+        const nameLocked= s.name?.locked   || false;
+        const genLocked = s.gender?.locked || false;
+        const ageLocked = s.age?.locked    || false;
+        const demoLocked= s.demo?.locked   || false;
+
+        const lockIcon = (locked) => locked
+            ? `<i class="fa-solid fa-lock text-red-500 lock-icon locked cursor-pointer hover:text-white"></i>`
+            : `<i class="fa-solid fa-lock-open text-slate-500 lock-icon unlocked cursor-pointer hover:text-white"></i>`;
+
+        container.innerHTML += `
+        <div class="bg-slate-900/80 p-3 rounded border border-slate-600 shadow-md flex flex-col gap-2">
+            <div class="font-bold text-red-400 border-b border-slate-700 pb-1">Orang ${i+1}</div>
+            <div class="flex gap-2 items-center">
+                <input type="text" id="adv_name_${i}" value="${nameVal}" oninput="handleAdvancedNameInput(${i})"
+                    placeholder="Nama Artis" aria-label="Nama ${i+1}"
+                    class="flex-1 min-w-0 bg-slate-800 text-green-300 border ${nameLocked?'border-red-500':'border-green-700'} rounded p-1.5 text-xs outline-none placeholder-slate-500">
+                <span onclick="toggleAdvLock('adv_name_${i}',this)">${lockIcon(nameLocked)}</span>
+            </div>
+            <div class="flex gap-2 items-center">
+                <select id="adv_gender_${i}" onchange="triggerGenerate()"
+                    class="flex-1 min-w-0 bg-slate-800 text-slate-200 border ${genLocked?'border-red-500':'border-slate-600'} rounded p-1.5 text-xs outline-none">
+                    <option value="RANDOM" ${genVal==="RANDOM"?"selected":""}>🎲 Acak</option>
+                    <option value="MALE"   ${genVal==="MALE"  ?"selected":""}>Pria</option>
+                    <option value="FEMALE" ${genVal==="FEMALE"?"selected":""}>Wanita</option>
+                </select>
+                <span onclick="toggleAdvLock('adv_gender_${i}',this)">${lockIcon(genLocked)}</span>
+            </div>
+            <div class="flex gap-2 items-center">
+                <select id="adv_age_${i}" onchange="triggerGenerate()"
+                    class="flex-1 min-w-0 bg-slate-800 text-slate-200 border ${ageLocked?'border-red-500':'border-slate-600'} rounded p-1.5 text-xs outline-none">
+                    <option value="RANDOM"      ${ageVal==="RANDOM"      ?"selected":""}>🎲 Acak</option>
+                    <option value="TEENAGER"    ${ageVal==="TEENAGER"    ?"selected":""}>Remaja</option>
+                    <option value="YOUNG_ADULT" ${ageVal==="YOUNG_ADULT" ?"selected":""}>Dewasa Muda</option>
+                    <option value="ADULT"       ${ageVal==="ADULT"       ?"selected":""}>Dewasa</option>
+                    <option value="MATURE"      ${ageVal==="MATURE"      ?"selected":""}>Paruh Baya</option>
+                </select>
+                <span onclick="toggleAdvLock('adv_age_${i}',this)">${lockIcon(ageLocked)}</span>
+            </div>
+            <div class="flex gap-2 items-center">
+                <select id="adv_demo_${i}" onchange="triggerGenerate()"
+                    class="flex-1 min-w-0 bg-slate-800 text-slate-200 border ${demoLocked?'border-red-500':'border-slate-600'} rounded p-1.5 text-xs outline-none">
+                    <option value="RANDOM" ${demoVal==="RANDOM"?"selected":""}>🎲 Acak</option>
+                    ${demoOptions}
+                </select>
+                <span onclick="toggleAdvLock('adv_demo_${i}',this)">${lockIcon(demoLocked)}</span>
+            </div>
+        </div>`;
+
+        // Restore lock state after render
+        if (nameLocked)  lockState[`adv_name_${i}`]   = true;
+        if (genLocked)   lockState[`adv_gender_${i}`] = true;
+        if (ageLocked)   lockState[`adv_age_${i}`]    = true;
+        if (demoLocked)  lockState[`adv_demo_${i}`]   = true;
+    }
+}
+
+function toggleAdvLock(id, spanEl) {
+    lockState[id] = !lockState[id];
+    const locked = lockState[id];
+    const icon = spanEl.querySelector('i');
+    if (icon) {
+        icon.classList.toggle('fa-lock', locked);
+        icon.classList.toggle('fa-lock-open', !locked);
+        icon.classList.toggle('text-red-500', locked);
+        icon.classList.toggle('text-slate-500', !locked);
+        icon.classList.toggle('locked', locked);
+        icon.classList.toggle('unlocked', !locked);
+    }
+    const el = document.getElementById(id);
+    if (el) el.style.borderColor = locked ? '#ef4444' : '';
+}
+
+function handleGlobalNameInput() {
+    const nameEl = document.getElementById('customNameGlobal');
+    const hasName = nameEl && nameEl.value.trim().length > 0;
+    const ageEl = document.getElementById('ageSelect');
+    if (ageEl) {
+        ageEl.disabled = hasName;
+        ageEl.style.opacity = hasName ? '0.4' : '';
+    }
+    triggerGenerate(500);
+}
+
+function handleAdvancedNameInput(i) {
+    const nameEl = document.getElementById(`adv_name_${i}`);
+    const hasName = nameEl && nameEl.value.trim().length > 0;
+    ['age','demo'].forEach(f => {
+        const el = document.getElementById(`adv_${f}_${i}`);
+        if (el) { el.disabled = hasName; el.style.opacity = hasName ? '0.4' : ''; }
+    });
+    triggerGenerate(800);
+}
+
+function toggleStrictLevel() {
+    const v = getVal('strictSelect');
+    document.getElementById('strictLevelContainer')?.classList.toggle('hidden', v !== 'STRICT');
+}
+
+// ============================================================
+// RESET ALL
+// ============================================================
+function resetAndGenerate() {
+    const selects = ['numSelect','ageSelect','holidaySelect','eraSelect','compSelect','genderSelect','timeSelect','weatherSelect','bodyTypeSelect','hairAccSelect','strictSelect'];
+    selects.forEach(id => {
+        if (isLocked(id)) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === 'holidaySelect')   el.value = "RANDOM_HOLIDAY";
+        else if (id === 'compSelect') el.value = "NONE";
+        else if (id === 'bodyTypeSelect') el.value = "MATCH";
+        else if (id === 'strictSelect')   el.value = "FLEXIBLE";
+        else el.value = "RANDOM";
+    });
+
+    if (!isLocked('aestheticSelect')) document.getElementById('aestheticSelect').value = "DEFAULT";
+    if (!isLocked('locSelect'))       document.getElementById('locSelect').value = "RANDOM";
+    if (!isLocked('cameraSelect'))    document.getElementById('cameraSelect').value = "RANDOM";
+
+    if (!isLocked('customNameGlobal')) {
+        const el = document.getElementById('customNameGlobal');
+        if (el) { el.value = ""; handleGlobalNameInput(); }
+    }
+    if (!isLocked('customScenarioInput')) {
+        const el = document.getElementById('customScenarioInput');
+        if (el) el.value = "";
+    }
+
+    toggleStrictLevel();
+
+    const advToggle = document.getElementById('advancedToggle');
+    if (advToggle?.checked) {
+        const container = document.getElementById('characterRows');
+        if (container) {
+            const count = container.children.length;
+            for (let i = 0; i < count; i++) {
+                ['name','gender','age','demo'].forEach(f => {
+                    if (isLocked(`adv_${f}_${i}`)) return;
+                    const el = document.getElementById(`adv_${f}_${i}`);
+                    if (el) { el.value = f === 'gender' ? 'RANDOM' : (f === 'age' ? 'RANDOM' : (f === 'name' ? '' : 'RANDOM')); el.disabled = false; el.style.opacity = ''; }
+                });
+            }
+        }
+    }
+
+    if (!isLocked('locSelect')) renderLocationList();
+    if (!isLocked('cameraSelect')) renderCameraList();
+    if (!isLocked('aestheticSelect')) renderAestheticList();
+
+    generatePromptNow();
+}
+
+// ============================================================
+// MAIN GENERATE
+// ============================================================
+function generatePromptCore() {
+    try { _generate(); }
+    catch(e) {
+        console.error("Generate error:", e);
+        const out = document.getElementById('textOutputNatural');
+        if (out) out.textContent = `⚠️ Error: ${e.message}\n\nCek console untuk detail.`;
+    }
+}
+
+function _generate() {
+    const numVal       = getVal('numSelect');
+    const ageVal       = getVal('ageSelect');
+    const holidayVal   = getVal('holidaySelect');
+    const eraVal       = getVal('eraSelect');
+    const genderVal    = getVal('genderSelect');
+    const cameraStyleVal = getVal('cameraSelect');
+    const compVal      = getVal('compSelect');
+    const locVal       = getVal('locSelect');
+    const timeVal      = getVal('timeSelect');
+    const weatherVal   = getVal('weatherSelect');
+    const aestheticVal = getVal('aestheticSelect');
+    const bodyTypeVal  = getVal('bodyTypeSelect');
+    const hairAccVal   = getVal('hairAccSelect');
+    const strictVal    = getVal('strictSelect');
+    const customScenario = (document.getElementById('customScenarioInput')?.value || "").trim();
+    const globalCustomName = (document.getElementById('customNameGlobal')?.value || "").trim();
+
+    // Resolve number of subjects
+    let numSubjects = numVal === "RANDOM" ? Math.floor(Math.random() * 6) + 1 : parseInt(numVal);
+    if (isNaN(numSubjects) || numSubjects < 1) numSubjects = 1;
+    if (genderVal === "COUPLE") numSubjects = 2;
+
+    // Resolve holiday
+    let activeHoliday = null;
+    if (holidayVal === "RANDOM_HOLIDAY") {
+        if (Math.random() > 0.65) activeHoliday = getRandom(Object.keys(holidayLocationDB));
+    } else if (holidayVal !== "NONE") {
+        activeHoliday = holidayVal;
+    }
+
+    // Resolve era
+    let selectedEraId = eraVal !== "RANDOM" ? eraVal : getWeightedEra();
+
+    // Resolve setting/location
+    let setting = null;
+    if (activeHoliday && holidayLocationDB[activeHoliday]) {
+        setting = getRandom(holidayLocationDB[activeHoliday]);
+    } else if (locVal !== "RANDOM") {
+        const idx = parseInt(locVal);
+        if (!isNaN(idx) && idx >= 0 && idx < settings.length) {
+            setting = settings[idx];
+            if (setting.era_id !== "TIMELESS_BASIC") selectedEraId = setting.era_id;
+        }
+    }
+
+    if (!setting) {
+        let pool = settings.filter(s => s.era_id === selectedEraId);
+        if (pool.length === 0) pool = settings;
+        // Mirror-friendly bias if needed
+        if (cameraStyleVal.includes("MIRROR") || (cameraStyleVal === "RANDOM" && Math.random() < 0.08)) {
+            const mirPool = pool.filter(s => isMirrorFriendly(s.env));
+            if (mirPool.length > 0) pool = mirPool;
+        }
+        setting = getRandom(pool);
+    }
+
+    const envName = setting?.env || "";
+
+    // Shot type
+    let shotData = getShotTypeData(selectedEraId, cameraStyleVal, numSubjects, genderVal, customScenario, envName);
+
+    // Environment-specific shot overrides (same logic preserved from original)
+    const envUp = envName.toUpperCase();
+    if (envUp.includes("WEDDING RECEPTION") && genderVal === "COUPLE" && cameraStyleVal !== "MATCH_POSE") {
+        shotData.type = "POSED_SCENARIO"; shotData.pose = "STANDING SIDE-BY-SIDE, SMILING POLITELY AT CAMERA"; shotData.gaze = "DIRECT EYE CONTACT WITH CAMERA"; shotData.vibe = "FORMAL COUPLE PHOTO AT WEDDING";
+    }
+    if ((envUp.includes("BACK SEAT") || envUp.includes("INNOVA") || envUp.includes("NIGHT TAXI")) && (shotData.type === "CANDID_UNAWARE" || shotData.type === "ACCIDENTAL_AWKWARD_SHOT" || shotData.type === "CANDID_INTENTIONAL") && cameraStyleVal !== "MATCH_POSE") {
+        shotData.pose = "TURNING HEAD HALFWAY BACK WITH SURPRISED-BUT-AMUSED EXPRESSION, HAND NEAR CHIN IMPERFECTLY POSED";
+        shotData.vibe = "RAW, UNPLANNED 'KETAUAN DIFOTO', AUTHENTIC REAL-LIFE MOMENT, RUSHED SHOT";
+        shotData.angle += ", MESSY FRAMING, SLIGHTLY TILTED, OFF-CENTER";
+    }
+    if (envUp.includes("ELEVATOR") && shotData.type === "MIRROR_SELFIE" && cameraStyleVal !== "MATCH_POSE") {
+        shotData.pose = "STANDING HOLDING PHONE FOR A MIRROR SELFIE, PULLING DOWN TINY SUNGLASSES TO LOOK OVER THEM";
+    }
+    if ((envUp.includes("TRAIN") || envUp.includes("KRL")) && (shotData.type === "POSED_SCENARIO" || shotData.type === "CANDID_INTENTIONAL") && cameraStyleVal !== "MATCH_POSE") {
+        shotData.pose = "MAKING A HEART SHAPE WITH HANDS OVER A DRAWN HEART ON THE FOGGY WINDOW";
+        shotData.gaze = "SMILING SOFTLY OUT THE WINDOW";
+    }
+    if ((envUp.includes("CONCERT STAGE") || envUp.includes("PERFORMING")) && shotData.type === "POSED_SCENARIO" && !customScenario && cameraStyleVal !== "MATCH_POSE") {
+        shotData.pose = getRandom(["PERFORMING ENERGETICALLY WITH A MICROPHONE","STANDING CONFIDENTLY ON STAGE LOOKING AT CROWD","SQUATTING AT EDGE OF STAGE POINTING AT CAMERA"]);
+        shotData.vibe = "ROCKSTAR CONCERT PERFORMANCE VIBE";
+    }
+    if (envUp.includes("PHOTOGRAPHY PIT") && cameraStyleVal !== "MATCH_POSE") {
+        shotData.angle = "LOW ANGLE SHOT, LOOKING UP AT SUBJECT ON STAGE"; shotData.vibe = "PROFESSIONAL CONCERT PHOTOGRAPHY VIBE";
+        if (shotData.type === "POSED_SCENARIO" && !customScenario) shotData.pose = "LEANING OVER THE EDGE OF STAGE LOOKING DOWN AT CAMERA INTENSELY";
+    }
+    if (envUp.includes("BEACH") && !envUp.includes("NIGHT") && shotData.type !== "CANDID_UNAWARE" && !customScenario && cameraStyleVal !== "MATCH_POSE") {
+        shotData.pose = "GIVING A DOUBLE THUMBS UP ENTHUSIASTICALLY WITH A BIG SMILE";
+    }
+    if (envUp.includes("WARTEG") && (shotData.type === "FRONT_CAMERA_SELFIE" || shotData.type === "CLOSE_UP_SELFIE") && cameraStyleVal !== "MATCH_POSE") {
+        shotData.angle = "WIDE ANGLE DISTORTED SELFIE WITH FINGER PARTIALLY BLOCKING LENS EDGE";
+        shotData.pose = "FUNNY AWKWARD EXPRESSION, TOO CLOSE TO CAMERA";
+    }
+    if (cameraStyleVal === "MATCH_POSE") {
+        shotData.type  = "REFERENCE_DRIVEN_POSE_SHOT";
+        shotData.pose  = "EXACTLY MATCH THE SUBJECT'S POSE, POSTURE, HAND PLACEMENT, AND ACCESSORY INTERACTION AS SHOWN IN THE PROVIDED REFERENCE IMAGE. STRICTLY ENFORCE THIS.";
+        shotData.angle = "MATCH THE EXACT CAMERA ANGLE, FORESHORTENING, AND PERSPECTIVE AS SHOWN IN THE PROVIDED REFERENCE IMAGE.";
+        shotData.focal = "MATCH REFERENCE LENS";
+        shotData.gaze  = "MATCH THE EXACT GAZE FROM THE REFERENCE IMAGE";
+    }
+
+    // Composition
+    let finalComposition = "NATURAL AMATEUR COMPOSITION, UNPLANNED FRAMING";
+    if (cameraStyleVal === "MATCH_POSE") {
+        finalComposition = "STRICTLY MATCH THE COMPOSITION AND FRAMING OF THE REFERENCE IMAGE";
+    } else if (compVal !== "NONE") {
+        let compId = compVal === "RANDOM" ? getRandom(Object.keys(compositionsRules)) : compVal;
+        if (compositionsRules[compId]) finalComposition = compositionsRules[compId];
+    }
+
+    // Time / weather
+    const timeStr     = timeVal !== "RANDOM" ? timeVal : getRandom(["MORNING","AFTERNOON","GOLDEN_HOUR","NIGHT"]);
+    const weatherStr  = weatherVal !== "RANDOM" ? weatherVal : getRandom(["CLEAR","OVERCAST","RAINING"]);
+    const timeDescMap = { MORNING:"MORNING LIGHT, CRISP AND FRESH", AFTERNOON:"HARSH AFTERNOON SUN, BRIGHT DAYLIGHT", GOLDEN_HOUR:"GOLDEN HOUR, WARM SUNSET GLOW, LONG SHADOWS", NIGHT:"NIGHT TIME, ILLUMINATED BY ARTIFICIAL STREET OR NEON LIGHTS" };
+    const weatherDescMap = { CLEAR:"CLEAR TROPICAL WEATHER", OVERCAST:"OVERCAST AND GLOOMY, CLOUDY SKY, FLAT MOODY LIGHTING", RAINING:"RAINING HEAVILY, WET SURFACES REFLECTING LIGHT, VISIBLE RAINDROPS" };
+
+    // Lighting
+    let lighting = getRandom(lightings);
+    if (envUp.includes("RESTROOM") || envUp.includes("BATHROOM") || envUp.includes("TOILET")) {
+        lighting = lightings.find(l => l.source.includes("VANITY")) || lighting;
+    }
+    if (timeStr === "NIGHT" && lighting.source.includes("SUNLIGHT")) {
+        lighting = { source:"ARTIFICIAL NEON OR STREET LAMPS", dir:"OMNIDIRECTIONAL LOW", qual:"HIGH CONTRAST, NOISY SHADOWS, ORANGE OR BLUE CAST" };
+    }
+    if (envUp.includes("CONCERT STAGE") || envUp.includes("PHOTOGRAPHY PIT")) {
+        lighting = { source:"INTENSE STAGE LIGHTING, SPOTLIGHTS, AND LASERS", dir:"DRAMATIC RIM", qual:"DRAMATIC RIM LIGHTING, HIGH CONTRAST, COLORFUL HUES" };
+    }
+
+    // Aesthetic filter
+    let activeAesthetic = aestheticVal;
+    if (activeAesthetic === "RANDOM") {
+        activeAesthetic = Math.random() < 0.5 ? getRandom(Object.keys(aestheticFilters)) : "DEFAULT";
+    }
+
+    let finalRender   = "PHOTOREALISTIC RAW UPLOAD, LOCAL INDONESIAN VIBE, AMATEUR SMARTPHONE SHOT";
+    let finalFlaws    = selectedEraId === "GRUNGE_1990S" ? "HEAVY FILM GRAIN, LIGHT LEAKS" : selectedEraId === "Y2K_2000S" ? "LOW RES PIXELATION, NOISY" : "SLIGHTLY COMPRESSED SOCIAL MEDIA QUALITY";
+    let finalCamModel = shotData.cameraModel;
+
+    if (activeAesthetic !== "DEFAULT") {
+        const aes = aestheticFilters[activeAesthetic];
+        if (aes) {
+            lighting = { source: aes.lighting, dir: lighting.dir, qual: aes.render };
+            finalRender   = aes.render + ", RETAINING LOCAL INDONESIAN CONTEXT";
+            finalFlaws    = aes.render;
+            if (cameraStyleVal !== "MATCH_POSE") finalCamModel = aes.cameraType;
+        }
+    }
+
+    // Night / weather flaws
+    if (timeStr === "NIGHT" || envUp.includes("CLUB") || envUp.includes("DARK")) {
+        finalFlaws += ", HEAVY ISO NOISE, COLOR FRINGING, GRAINY SHADOWS, POOR LOW-LIGHT ARTIFACTS";
+    }
+    if (envUp.includes("PHONE SCREEN")) {
+        lighting = { source:"BLUE LIGHT FROM SMARTPHONE SCREEN", dir:"FRONTAL", qual:"HARSH GLOW ON FACE, SURROUNDINGS PITCH BLACK" };
+    }
+
+    // Aspect ratio
+    let aspectRatio = getRandom(["9:16 (VERTICAL TIKTOK/REELS)","3:4 (SMARTPHONE DEFAULT)","1:1 (OLD INSTAGRAM)"]);
+    if (selectedEraId === "HIPSTER_2010S" || activeAesthetic === "OLD_SMARTPHONE" || activeAesthetic === "ANALOG_AIRY") aspectRatio = "1:1 (OLD INSTAGRAM/POLAROID)";
+
+    // Advanced panel check
+    const isAdvanced = document.getElementById('advancedToggle')?.checked;
+
+    // Build per-person descriptions
+    const subjectDescriptions  = [];
+    const outfitDescriptions   = [];
+    const accDescriptions      = [];
+    const appearanceDescriptions = [];
+
+    for (let i = 0; i < numSubjects; i++) {
+        let pGenderVal = genderVal;
+        let pAgeVal    = ageVal;
+        let pDemoVal   = "RANDOM";
+        let customName = i === 0 ? globalCustomName : "";
+
+        if (isAdvanced) {
+            const advGen  = document.getElementById(`adv_gender_${i}`);
+            const advAge  = document.getElementById(`adv_age_${i}`);
+            const advDemo = document.getElementById(`adv_demo_${i}`);
+            const advName = document.getElementById(`adv_name_${i}`);
+            if (advGen  && !advGen.disabled)  pGenderVal = advGen.value;
+            if (advAge  && !advAge.disabled)  pAgeVal    = advAge.value;
+            if (advDemo && !advDemo.disabled) pDemoVal   = advDemo.value;
+            if (advName) customName = advName.value.trim();
+        } else {
+            if (genderVal === "COUPLE") pGenderVal = i === 0 ? "MALE" : "FEMALE";
+        }
+
+        const pSubj   = buildSubject(pGenderVal, pAgeVal, bodyTypeVal);
+        const pDemo   = pDemoVal !== "RANDOM" ? pDemoVal : getRandom(demographics);
+        const wardrobe = buildWardrobe(pSubj.genderId, selectedEraId, activeHoliday, envName, customName, shotData.type);
+
+        // Hair/acc override for strict match
+        if (hairAccVal === "MATCH_STRICT") {
+            wardrobe.hair = "EXACTLY MATCHING REFERENCE IMAGE HAIR";
+            wardrobe.acc  = "EXACTLY MATCHING REFERENCE IMAGE ACCESSORIES";
+        }
+
+        // Beauty expression
+        let expr = getRandom(beautyTypes);
+        const isSelfieType = ["FRONT_CAMERA_SELFIE","CLOSE_UP_SELFIE","MIRROR_SELFIE","CANDID_INTENTIONAL","POSED_SCENARIO","POV_ULTRAWIDE_SELFIE"].includes(shotData.type);
+        if (isSelfieType && !customScenario && cameraStyleVal !== "MATCH_POSE") {
+            if (pSubj.genderId === "FEMALE" && Math.random() < 0.6) {
+                expr += ", " + getRandom(["PLAYFULLY BITING LOWER LIP","STICKING TONGUE OUT PLAYFULLY","WINKING AT CAMERA","CUTE POUTING LIPS","LAUGHING WITH EYES SQUINTED CLOSED"]);
+            } else if (pSubj.genderId === "MALE" && Math.random() < 0.3) {
+                expr += ", " + getRandom(["MAKING A SILLY DUCK FACE","SMILING WARMLY","SERIOUS COOL EXPRESSION"]);
+            }
+        }
+
+        const subjectLine = customName
+            ? `${customName.toUpperCase()}, A ${pSubj.genderId}, WITH ${wardrobe.hair} AND ${expr}`
+            : `${pSubj.subjectName} (${pDemo}), WITH ${wardrobe.hair} AND ${expr}`;
+
+        const isHijab = wardrobe.hair && (wardrobe.hair.includes("HIJAB") || wardrobe.hair.includes("PASHMINA"));
+        const appearance = activeHoliday
+            ? `FESTIVE ${activeHoliday.replace(/_/g,' ')} HOLIDAY OUTFIT${isHijab ? ', MODEST/COVERED UP' : ''}`
+            : (isHijab ? "MODEST CASUAL EVERYDAY WEAR, COVERED UP" : "CASUAL EVERYDAY WEAR");
+
+        subjectDescriptions.push(subjectLine);
+        outfitDescriptions.push(`${wardrobe.top}, ${wardrobe.bottom}, AND ${wardrobe.shoe}`);
+        accDescriptions.push(wardrobe.acc);
+        appearanceDescriptions.push(appearance);
+    }
+
+    const finalSubject   = numSubjects === 1 ? subjectDescriptions[0] : `GROUP OF ${numSubjects} PEOPLE: ` + subjectDescriptions.map((d,i) => `[P${i+1}] ${d}`).join(" | ");
+    const finalOutfit    = numSubjects === 1 ? outfitDescriptions[0]  : outfitDescriptions.map((d,i) => `[P${i+1}] ${d}`).join(" | ");
+    const finalAcc       = numSubjects === 1 ? accDescriptions[0]     : accDescriptions.map((d,i) => `[P${i+1}] ${d}`).join(" | ");
+    const finalAppearance= numSubjects === 1 ? appearanceDescriptions[0] : "MIXED GROUP STYLES";
+
+    const styleName = `INDONESIAN ${activeHoliday ? activeHoliday : selectedEraId} ${shotData.type}${activeAesthetic !== "DEFAULT" ? ' + ' + activeAesthetic : ''}`;
+
+    // Negative prompt
+    let negPrompt = "professional studio lighting, DSLR quality, perfect composition, overly clean, over-smooth skin, beauty filter, cinematic lighting, sharp perfect image, CGI, 3D render";
+    const selfieTypes = ["FRONT_CAMERA_SELFIE","CLOSE_UP_SELFIE","CANDID_INTENTIONAL","POSED_SCENARIO"];
+    const phoneEnvs   = ["ELEVATOR","STADIUM","BRIDGE","DARK ROOM","PHONE SCREEN"];
+    const hasPhoneEnv = phoneEnvs.some(e => envUp.includes(e));
+    if (selfieTypes.includes(shotData.type) && !hasPhoneEnv && cameraStyleVal !== "MATCH_POSE") {
+        negPrompt = "showing phone in hand, holding camera, mobile phone in frame, mirror reflection, " + negPrompt;
+    } else if (shotData.type === "CANDID_UNAWARE") {
+        negPrompt = "holding camera to take photo, selfie arm, mirror reflection, " + negPrompt;
+    }
+    if (hairAccVal === "MATCH_STRICT" || strictVal === "STRICT") {
+        negPrompt += ", double glasses, changing hair style, different accessories, adding hats";
+    }
+    if (cameraStyleVal === "MATCH_POSE") {
+        negPrompt += ", flat angle, eye-level if reference shows extreme angle, mirror reflection";
+    }
+    if (shotData.type === "POV_ULTRAWIDE_SELFIE") {
+        negPrompt += ", flat angle, eye-level, mirror reflection";
+    }
+
+    // Build photo JSON
+    const imagePromptData = {
+        META: {
+            STYLE_NAME:  styleName,
+            ASPECT_RATIO: aspectRatio,
+            PROMPT_PREFIX: `IMG_INDO_${activeHoliday || selectedEraId}_${shotData.type}`
+        },
+        CAMERA: {
+            MODEL:           finalCamModel,
+            FOCAL_LENGTH:    shotData.focal,
+            ANGLE:           shotData.angle,
+            COMPOSITION:     finalComposition,
+            SHOT_TYPE:       `AMATEUR SNAPSHOT, ${shotData.type}`
+        },
+        SUBJECT: {
+            PRIMARY:         finalSubject,
+            POSE:            shotData.pose,
+            GAZE:            shotData.gaze
+        },
+        WARDROBE: {
+            THEME:           activeHoliday ? `${activeHoliday} HOLIDAY ATTIRE` : selectedEraId,
+            OUTFITS:         finalOutfit,
+            ACCESSORIES:     finalAcc,
+            APPEARANCE:      finalAppearance
+        },
+        ENVIRONMENT: {
+            LOCATION:        envName,
+            TIME_OF_DAY:     timeDescMap[timeStr] || "DAYLIGHT",
+            WEATHER:         weatherDescMap[weatherStr] || "CLEAR TROPICAL",
+            ARCH_DETAILS:    setting?.arch || "",
+            PROPS:           setting?.props || "",
+            VIBE:            shotData.vibe
+        },
+        LIGHTING: {
+            SOURCE:    lighting.source,
+            DIRECTION: lighting.dir,
+            QUALITY:   lighting.qual
+        },
+        RENDERING: {
+            ENGINE:          finalRender,
+            AESTHETIC_FLAWS: finalFlaws,
+            POSTPROCESSING:  "UNEDITED CAMERA ROLL LOOK"
+        },
+        NEGATIVE_PROMPT: negPrompt
+    };
+
+    if (cameraStyleVal === "MATCH_POSE") {
+        imagePromptData.IMAGE_REF_INSTRUCTION = "ControlNet Pose/Depth enforcement: STRICTLY replicate the exact anatomical posture, camera angle, perspective, and item placements as seen in the reference image. Identity, environment, and clothing adapt to the text prompt.";
+    }
+    if (strictVal === "STRICT") {
+        const sw = parseFloat(document.getElementById('strictWeight')?.value || "1.0");
+        imagePromptData.AI_ENFORCEMENT = {
+            STRICT_MODE: "ENABLED",
+            REFERENCE_STRENGTH: sw,
+            INSTRUCTION: "Enable strict facial consistency mode. Prioritize facial features from the provided reference image. Maintain subject identity while only adapting pose, lighting, and background. Do not alter core facial structure.",
+            NEGATIVE_PROMPT: negPrompt + ", deformed, generic faces, morphed bodies, fused people, changing facial features"
+        };
+        delete imagePromptData.NEGATIVE_PROMPT;
+    }
+
+    // Build natural prompt
+    const t = (s) => (s || "").toLowerCase();
+    let natural = `A ${t(imagePromptData.CAMERA.SHOT_TYPE)} featuring ${t(finalSubject)}. `;
+    natural += `The subject is ${t(shotData.pose)}, ${t(shotData.gaze)}. `;
+    natural += `Wardrobe: ${t(finalOutfit)}`;
+    if (finalAcc && !finalAcc.toUpperCase().includes("NONE")) natural += `, accessorized with ${t(finalAcc)}`;
+    natural += `. Overall appearance: ${t(finalAppearance)}. `;
+    natural += `Scene is at ${t(envName)} during ${t(timeDescMap[timeStr])} in ${t(weatherDescMap[weatherStr])}. `;
+    if (setting?.arch) natural += `Setting details: ${t(setting.arch)}. Props: ${t(setting.props)}. `;
+    natural += `Vibe: ${t(shotData.vibe)}. `;
+    natural += `Shot uses ${t(finalComposition)}, captured with ${t(finalCamModel)}, ${t(shotData.focal)}, from ${t(shotData.angle)}. `;
+    natural += `Lighting: ${t(lighting.source)} (${t(lighting.dir)}), creating ${t(lighting.qual)}. `;
+    natural += `Final image has a ${t(finalRender)} look with ${t(finalFlaws)}.`;
+    natural += `\n\nNegative Prompt: ${negPrompt}`;
+    if (strictVal === "STRICT") natural += `\n\nMANDATORY: Enable strict facial consistency mode. Prioritize facial identity from the provided reference image. Do not mutate features.`;
+
+    // Build video JSON
+    const videoScenes = numSubjects === 1
+        ? ["SUBJECT TALKING ANIMATEDLY IN BAHASA INDONESIA SLANG","SUBJECT WIPING SWEAT CASUALLY IN TROPICAL HEAT","LIP-SYNCING TO VIRAL TIKTOK AUDIO","SUBJECT SCROLLING PHONE THEN LOOKING UP TO CAMERA"]
+        : genderVal === "COUPLE"
+            ? ["COUPLE LAUGHING AND JOKING AROUND TOGETHER","COUPLE WALKING CLOSE TOGETHER","ROMANTIC CASUAL INTERACTION"]
+            : [`GROUP OF ${numSubjects} FRIENDS LAUGHING TOGETHER","GROUP LIP-SYNCING TO VIRAL TIKTOK AUDIO","MESSY GROUP INTERACTION, PUSHING EACH OTHER PLAYFULLY`];
+
+    const videoData = {
+        WORKFLOW: "USE IMAGE GENERATED FROM JSON PHOTO AS STARTING FRAME (IMAGE-TO-VIDEO)",
+        DURATION: getRandom(["5 SECONDS","7 SECONDS","10 SECONDS"]),
+        CAMERA_MOVEMENT: getRandom(["SHAKY HANDHELD RECORDING","QUICK SNAPCHAT ZOOM IN/OUT","CASUAL PAN AROUND THE SCENE","STATIC BUT HAND SHAKING SLIGHTLY"]),
+        SCENE_DYNAMICS: getRandom(videoScenes),
+        FPS_STYLE: selectedEraId === "MODERN_2020S" ? "60FPS SMARTPHONE VIDEO SMOOTH" : "30FPS CHOPPY DIGITAL VIDEO",
+        TEXT_PROMPT: `Amateur phone recording in Indonesia during ${timeStr.toLowerCase().replace('_',' ')}. Weather: ${weatherStr.toLowerCase()}. ${getRandom(videoScenes)}. Raw and authentic feel.`
+    };
+    if (strictVal === "STRICT") videoData.TEXT_PROMPT += " STRICT: Do not mutate subject features.";
+
+    // Write outputs
+    document.getElementById('jsonOutputPhoto').textContent = JSON.stringify(imagePromptData, null, 2);
+    document.getElementById('textOutputNatural').textContent = natural;
+    document.getElementById('jsonOutputVideo').textContent = JSON.stringify(videoData, null, 2);
+
+    // Reset copy buttons
+    ['copyBtnNatural','copyBtnPhoto','copyBtnVideo'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.innerHTML = '<i class="fa-regular fa-copy"></i> Salin';
+            btn.className = btn.className.replace('bg-red-600 hover:bg-red-500','bg-slate-700 hover:bg-slate-600');
+        }
+    });
+
+    // Flash the generate button green
+    const genBtn = document.getElementById('generateBtn');
+    if (genBtn) {
+        genBtn.innerHTML = '<i class="fa-solid fa-check text-2xl"></i> DIPERBARUI!';
+        genBtn.classList.replace('bg-red-600','bg-green-600');
+        genBtn.classList.replace('hover:bg-red-500','hover:bg-green-500');
+        setTimeout(() => {
+            genBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles text-2xl"></i> GENERATE PROMPT';
+            genBtn.classList.replace('bg-green-600','bg-red-600');
+            genBtn.classList.replace('hover:bg-green-500','hover:bg-red-500');
+        }, 800);
+    }
+}
+
+// ============================================================
+// CLIPBOARD
+// ============================================================
+async function copyToClipboard(type) {
+    const map = { natural:'textOutputNatural', photo:'jsonOutputPhoto', video:'jsonOutputVideo' };
+    const btnMap = { natural:'copyBtnNatural', photo:'copyBtnPhoto', video:'copyBtnVideo' };
+    const content = document.getElementById(map[type])?.textContent || "";
+    if (!content || content.startsWith('//')) return;
+
+    const success = () => {
+        const btn = document.getElementById(btnMap[type]);
+        if (!btn) return;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Tersalin!';
+        btn.classList.replace('bg-slate-700','bg-red-600');
+        btn.classList.replace('hover:bg-slate-600','hover:bg-red-500');
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fa-regular fa-copy"></i> Salin';
+            btn.classList.replace('bg-red-600','bg-slate-700');
+            btn.classList.replace('hover:bg-red-500','hover:bg-slate-600');
+        }, 2000);
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(content).then(success).catch(console.error);
+    } else {
+        const ta = document.createElement("textarea");
+        ta.value = content;
+        ta.style.cssText = "position:fixed;left:-9999px;top:-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); success(); } catch(e) { console.error(e); }
+        document.body.removeChild(ta);
+    }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = () => {
+    setupListDelegation('locListContainer',    'locSelect');
+    setupListDelegation('cameraListContainer', 'cameraSelect');
+    setupListDelegation('aesListContainer',    'aestheticSelect');
+
+    renderLocationList();
+    renderCameraList();
+    renderAestheticList();
+
+    generatePromptNow();
+};
+</script>
+</body>
+</html>
